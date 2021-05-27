@@ -146,9 +146,6 @@ Source1: config-%{version}-x86_64
 Source2: cpupower.service
 Source3: cpupower.config
 
-# Do not package the source tarball.
-NoSource: 0
-
 %description
 This package provides the Linux kernel (vmlinuz), the core of any
 Linux-based operating system. The kernel handles the basic functions
@@ -767,6 +764,9 @@ fi
 %endif
 
 %changelog
+* Thu May 27 2021 Matthew Cover <matthew.cover@stackpath.com>
+- Import source tarball linux-5.12.7.tar.xz.
+
 * Wed May 26 2021 Alan Bartlett <ajb@elrepo.org> - 5.12.7-1
 - Updated with the 5.12.7 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.12.7]
