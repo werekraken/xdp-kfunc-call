@@ -9830,6 +9830,17 @@ static u32 sk_msg_convert_ctx_access(enum bpf_access_type type,
 	return insn - insn_buf;
 }
 
+BTF_SET_START(xdp_kfunc_ids)
+BTF_ID(func, bpf_kfunc_call_test1)
+BTF_ID(func, bpf_kfunc_call_test2)
+BTF_ID(func, bpf_kfunc_call_test3)
+BTF_SET_END(xdp_kfunc_ids)
+
+static bool xdp_check_kfunc_call(u32 kfunc_btf_id)
+{
+	return btf_id_set_contains(&xdp_kfunc_ids, kfunc_btf_id);
+}
+
 const struct bpf_verifier_ops sk_filter_verifier_ops = {
 	.get_func_proto		= sk_filter_func_proto,
 	.is_valid_access	= sk_filter_is_valid_access,
@@ -9859,6 +9870,7 @@ const struct bpf_verifier_ops xdp_verifier_ops = {
 	.is_valid_access	= xdp_is_valid_access,
 	.convert_ctx_access	= xdp_convert_ctx_access,
 	.gen_prologue		= bpf_noop_prologue,
+	.check_kfunc_call	= xdp_check_kfunc_call,
 };
 
 const struct bpf_prog_ops xdp_prog_ops = {
