@@ -4,7 +4,7 @@
 %define LKAver 5.12.7
 
 # Define the buildid, if required.
-%define buildid .kcall.3
+%define buildid .kcall.8
 
 # The following build options are enabled by default.
 # Use either --without <option> on your rpmbuild command line

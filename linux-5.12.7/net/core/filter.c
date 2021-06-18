@@ -77,6 +77,7 @@
 #include <net/transp_v6.h>
 #include <linux/btf_ids.h>
 #include <net/tls.h>
+#include <net/netfilter/nf_conntrack_tuple.h>
 
 static const struct bpf_func_proto *
 bpf_sk_base_func_proto(enum bpf_func_id func_id);
@@ -9830,10 +9831,41 @@ static u32 sk_msg_convert_ctx_access(enum bpf_access_type type,
 	return insn - insn_buf;
 }
 
+void noinline xdp_printk_nfct_tuple(const struct nf_conntrack_tuple *tuple) {
+	printk(KERN_ALERT "xdp_printk_nfct_tuple() start\n");
+
+	if (tuple->dst.protonum == IPPROTO_TCP) {
+		printk(KERN_ALERT "xdp_printk_nfct_tuple() tuple->dst.protonum == IPPROTO_TCP\n");
+	} else if (tuple->dst.protonum == IPPROTO_UDP) {
+		printk(KERN_ALERT "xdp_printk_nfct_tuple() tuple->dst.protonum == IPPROTO_UDP\n");
+	} else {
+		printk(KERN_ALERT "xdp_printk_nfct_tuple() tuple->dst.protonum == %u\n", tuple->dst.protonum); // u_int8_t protonum;
+		goto done;
+	}
+
+	if (tuple->src.l3num == AF_INET) {
+		printk(KERN_ALERT "xdp_printk_nfct_tuple() tuple->src.l3num == AF_INET\n");
+		printk(KERN_ALERT "xdp_printk_nfct_tuple() %pI4:%u > %pI4:%u\n",
+			&(tuple->src.u3.ip), ntohs(tuple->src.u.tcp.port),
+			&(tuple->dst.u3.ip), ntohs(tuple->dst.u.tcp.port));
+	} else if (tuple->src.l3num == AF_INET6) {
+		printk(KERN_ALERT "xdp_printk_nfct_tuple() tuple->src.l3num == AF_INET6\n");
+		printk(KERN_ALERT "xdp_printk_nfct_tuple() [%pI6c]:%u > [%pI6c]:%u\n",
+			&(tuple->src.u3.ip6), ntohs(tuple->src.u.tcp.port),
+			&(tuple->dst.u3.ip6), ntohs(tuple->dst.u.tcp.port));
+	} else {
+		printk(KERN_ALERT "xdp_printk_nfct_tuple() tuple->src.l3num == %u\n", tuple->src.l3num); // u_int16_t l3num;
+	}
+
+done:
+	printk(KERN_ALERT "xdp_printk_nfct_tuple() end\n");
+}
+
 BTF_SET_START(xdp_kfunc_ids)
 BTF_ID(func, bpf_kfunc_call_test1)
 BTF_ID(func, bpf_kfunc_call_test2)
 BTF_ID(func, bpf_kfunc_call_test3)
+BTF_ID(func, xdp_printk_nfct_tuple)
 BTF_SET_END(xdp_kfunc_ids)
 
 static bool xdp_check_kfunc_call(u32 kfunc_btf_id)
