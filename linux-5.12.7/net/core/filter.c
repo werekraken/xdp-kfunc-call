@@ -9861,11 +9861,62 @@ done:
 	printk(KERN_ALERT "xdp_printk_nfct_tuple() end\n");
 }
 
+struct a_kmod_hook __rcu *a_kmod_hook __read_mostly;
+EXPORT_SYMBOL_GPL(a_kmod_hook);
+
+u64 noinline a_kmod_bpf_kfunc_call_test1(struct sock *sk, u32 a, u64 b, u32 c, u64 d)
+{
+	struct a_kmod_hook *hook;
+	u64 ret = 0ULL;
+
+	rcu_read_lock();
+	hook = rcu_dereference(a_kmod_hook);
+	if (hook)
+		ret = hook->test1(sk, a, b, c, d);
+	rcu_read_unlock();
+
+	return ret;
+}
+EXPORT_SYMBOL(a_kmod_bpf_kfunc_call_test1);
+
+int noinline a_kmod_bpf_kfunc_call_test2(struct sock *sk, u32 a, u32 b)
+{
+	struct a_kmod_hook *hook;
+	int ret = 0;
+
+	rcu_read_lock();
+	hook = rcu_dereference(a_kmod_hook);
+	if (hook)
+		ret = hook->test2(sk, a, b);
+	rcu_read_unlock();
+
+	return ret;
+}
+EXPORT_SYMBOL(a_kmod_bpf_kfunc_call_test2);
+
+struct sock * noinline a_kmod_bpf_kfunc_call_test3(struct sock *sk)
+{
+	struct a_kmod_hook *hook;
+	struct sock *ret = NULL;
+
+	rcu_read_lock();
+	hook = rcu_dereference(a_kmod_hook);
+	if (hook)
+		ret = hook->test3(sk);
+	rcu_read_unlock();
+
+	return ret;
+}
+EXPORT_SYMBOL(a_kmod_bpf_kfunc_call_test3);
+
 BTF_SET_START(xdp_kfunc_ids)
 BTF_ID(func, bpf_kfunc_call_test1)
 BTF_ID(func, bpf_kfunc_call_test2)
 BTF_ID(func, bpf_kfunc_call_test3)
 BTF_ID(func, xdp_printk_nfct_tuple)
+BTF_ID(func, a_kmod_bpf_kfunc_call_test1)
+BTF_ID(func, a_kmod_bpf_kfunc_call_test2)
+BTF_ID(func, a_kmod_bpf_kfunc_call_test3)
 BTF_SET_END(xdp_kfunc_ids)
 
 static bool xdp_check_kfunc_call(u32 kfunc_btf_id)

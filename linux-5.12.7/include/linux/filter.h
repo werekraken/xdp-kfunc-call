@@ -897,6 +897,13 @@ int bpf_prog_create_from_user(struct bpf_prog **pfp, struct sock_fprog *fprog,
 			      bpf_aux_classic_check_t trans, bool save_orig);
 void bpf_prog_destroy(struct bpf_prog *fp);
 
+struct a_kmod_hook {
+	u64 (*test1)(struct sock *sk, u32 a, u64 b, u32 c, u64 d);
+	int (*test2)(struct sock *sk, u32 a, u32 b);
+	struct sock * (*test3)(struct sock *sk);
+};
+extern struct a_kmod_hook __rcu *a_kmod_hook;
+
 int sk_attach_filter(struct sock_fprog *fprog, struct sock *sk);
 int sk_attach_bpf(u32 ufd, struct sock *sk);
 int sk_reuseport_attach_filter(struct sock_fprog *fprog, struct sock *sk);
